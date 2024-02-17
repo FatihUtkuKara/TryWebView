@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  </script>
+
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/ammo.js/2.0.0/ammo.js"></script> -->
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/examples/js/loaders/GLTFLoader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.122.0/examples/js/controls/OrbitControls.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.122.0/examples/js/libs/stats.min.js"></script>
+
+  <style>
+    body {
+      /* background-image: url(https://ca.slack-edge.com/T01P4J7D52S-U02NJ074EN9-fb2d02b7758d-512); */
+      margin: 0;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      background-color: transparent;
+    }
+  </style>
+
+</head>
+
+<body>
+  <script>
+
+    let stats;
+    let camera, scene, raycaster, renderer, model;
+
+    let INTERSECTED;
+    let theta = 0;
+
+    let CLICKED = false;
+
+    const pointer = new THREE.Vector2();
+    const radius = 5;
+
+    init();
+    animate();
+
+    function init() {
+
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 20, 19);
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f0f0);
+      // camera.lookAt(scene.position);
+
+      const light = new THREE.DirectionalLight(0xffffff, 3);
+      light.position.set(1, 1, 1).normalize();
+      scene.add(light);
+
+      const geometry = new THREE.BoxGeometry();
+
+      var de = 0, dista = 2;
+
+      for (let i = 0; i < 1; i++) {
+
+        // de += dista;
+        // const object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: 0xffff00 }));
+        // object.userData = { name: i };
+        // object.position.x = de;
+        // object.position.y = 2;
+        // object.position.z = 2;
+        // // object.position.y = Math.random() * 40 - 20;
+        // // object.position.z = Math.random() * 40 - 20;
+
+        // // object.rotation.x = Math.random() * 2 * Math.PI;
+        // // object.rotation.y = Math.random() * 2 * Math.PI;
+        // // object.rotation.z = Math.random() * 2 * Math.PI;
+
+        // // object.scale.x = Math.random() + 0.5;
+        // // object.scale.y = Math.random() + 0.5;
+        // // object.scale.z = Math.random() + 0.5;
+
+        // const scale = 5;
+        // object.scale.x = scale;
+        // object.scale.y = scale;
+        // object.scale.z = scale;
+
+
+        // scene.add(object);
+
+        var modelURL = 'spintowin.glb';
+
+
+        var loader = new THREE.GLTFLoader();
+        loader.load(modelURL, gltf => {
+          model = gltf.scene;
+
+          model.traverse(child => {
+            if (child.isMesh) {
+              child.material.metalness = 0;
+            }
+          });
+
+          const size = 1;
+          model.scale.x = size;
+          model.scale.y = size;
+          model.scale.z = size;
+          model.name = "cark";
+          scene.add(model);
+          // console.log("model", Object.keys(model));
+          // console.log("model", model.matrix);
+        });
+
+      }
+
+      raycaster = new THREE.Raycaster();
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      stats = new Stats();
+      document.body.appendChild(stats.dom);
+
+      document.addEventListener('pointerdown', onPointerDown);
+      document.addEventListener('pointerup', onPointerUp);
+      document.addEventListener('pointermove', onPointerMove);
+
+      //
+
+      window.addEventListener('resize', onWindowResize);
+
+
+
+      // var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      // controls.enableDamping = false;
+      // controls.autoRotate = false;
+      // // controls.enableRotate = false;
+      // controls.enablePan = false;
+      // controls.enableZoom = false;
+      // controls.minPolarAngle = Math.PI / 4;
+      // controls.maxPolarAngle = Math.PI / 4;
+
+    }
+
+    function onWindowResize() {
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function onPointerMove(event) {
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+      pointer.event = event;
+      // console.log("onPointerMove");
+    }
+
+    function onPointerDown(event) {
+      CLICKED = true;
+      console.log("CLICKED", CLICKED);
+    }
+
+    function onPointerUp(event) {
+      CLICKED = false;
+      console.log("CLICKED", CLICKED);
+    }
+
+    //
+
+    function animate() {
+
+      requestAnimationFrame(animate);
+
+      render();
+      stats.update();
+
+    }
+
+    console.log("scene.children",scene.children);
+    function render() {
+
+      // theta += 0.1;
+
+      // camera.position.x = radius * Math.sin(THREE.MathUtils.degToRad(theta));
+      // camera.position.y = radius * Math.sin(THREE.MathUtils.degToRad(theta));
+      // camera.position.z = radius * Math.cos(THREE.MathUtils.degToRad(theta));
+      camera.lookAt(scene.position);
+
+      camera.updateMatrixWorld();
+
+      // find intersections
+
+      raycaster.setFromCamera(pointer, camera);
+
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      if (intersects.length > 0) {
+
+        // console.log(intersects[0].object);
+        if (INTERSECTED != intersects[0].object) {
+          if (CLICKED) {
+
+            // if (INTERSECTED) { INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex); }
+
+            INTERSECTED = intersects[0].object;
+            // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+            // INTERSECTED.material.emissive.setHex(0xff0000);
+            console.log(INTERSECTED.userData.name);
+
+            // console.log(INTERSECTED);
+            // console.log(pointer);
+
+            // INTERSECTED.position.y = pointer.event.movementY;
+            // INTERSECTED.rotation.y = pointer.event.clientY; // her nesneyi ayrı yakalayıp döndürüyo
+
+            model.rotation.y = pointer.event.clientY/10; 
+          }
+
+
+        }
+
+      } else {
+
+        // if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+        INTERSECTED = null;
+
+      }
+
+      renderer.render(scene, camera);
+
+    }
+  </script>
+
+
+</body>
+
+</html>

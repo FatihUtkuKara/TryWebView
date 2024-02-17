@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/examples/js/loaders/GLTFLoader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.122.0/examples/js/controls/OrbitControls.min.js"></script>
+
+
+  <style>
+    body {
+      /* background-image: url(https://ca.slack-edge.com/T01P4J7D52S-U02NJ074EN9-fb2d02b7758d-512); */
+      background-color: transparent;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      background-color: transparent;
+    }
+  </style>
+
+</head>
+
+<body>
+  <script>
+    function runWebQL() {
+
+      console.clear();
+
+      var scene = new THREE.Scene();
+
+      var camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight);
+      camera.position.set(0, 10, 7);
+      camera.lookAt(scene.position);
+
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setAnimationLoop(animationLoop);
+
+      document.body.appendChild(renderer.domElement);
+
+      window.addEventListener("resize", (event) => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.autoRotate = true;
+
+      renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+
+      var light = new THREE.DirectionalLight('gray', 3);
+      scene.add(light);
+
+      // var modelURL = 'https://boytchev.github.io/suica/assets/models/cars/tractor.glb';
+      var modelURL = 'spintowin.glb';
+      var model;
+
+
+      var loader = new THREE.GLTFLoader();
+      loader.load(modelURL, gltf => {
+        model = gltf.scene;
+
+        model.traverse(child => {
+          if (child.isMesh) {
+            child.material.metalness = 0;
+          }
+        });
+
+        model.scale.x = 0.1;
+        model.scale.y = 0.1;
+        model.scale.z = 0.1;
+        scene.add(model);
+        console.log(model);
+      });
+
+      function animationLoop(t) {
+        controls.update();
+        light.position.copy(camera.position);
+        renderer.render(scene, camera);
+      }
+
+    }
+
+
+    runWebQL()
+  </script>
+
+
+</body>
+
+</html>
