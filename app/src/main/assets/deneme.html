@@ -3,16 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>WebGL Circle</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
-    <h1>DENEME</h1>
-    <script>
-            function deneme() {
-            document.body.style.background = 'red';
+<canvas id="glCanvas" width="400" height="400"></canvas>
+<script>
+        // WebGL contextini al
+        var canvas = document.getElementById("glCanvas");
+        var gl = canvas.getContext("webgl");
+
+        if (!gl) {
+            console.log("WebGL context bulunamadı. Tarayıcınız WebGL'i desteklemiyor olabilir.");
+        }
+
+        // Shader'ları oluştur
+        var vertexShaderSource = `
+            attribute vec2 a_position;
+            void main() {
+                gl_Position = vec4(a_position, 0, 1);
             }
-            deneme();
+        `;
+
+        var fragmentShaderSource = `
+            precision mediump float;
+            void main() {
+                gl_FragColor = vec4(1, 0, 0, 1);
+            }
+        `;
+
+        function createShader(gl, type, source) {
+            var shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+            if (success) {
+                return shader;
+            }
+
+            console.log(gl.getShaderInfoLog(shader));
+            gl.deleteShader(shader);
+        }
+
+        var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+        // Program oluştur ve Shader'ları bağla
+        var program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        // Dağınıklık (Buffer) oluştur
+        var positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+        // Daireyi oluştur
+        var positions = [];
+        var segments = 100;
+        var radius = 0.5;
+        var centerX = 0.5;
+        var centerY = 0.5;
+
+        for (var i = 0; i <= segments; i++) {
+            var angle = i * 2 * Math.PI / segments;
+            positions.push(centerX + radius * Math.cos(angle));
+            positions.push(centerY + radius * Math.sin(angle));
+        }
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+        // Shader'daki a_position ile Buffer'ı bağla
+        var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+        // Daireyi çiz
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, segments + 2);
     </script>
 </body>
-
 </html>

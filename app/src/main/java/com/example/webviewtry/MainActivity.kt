@@ -1,5 +1,6 @@
 package com.example.webviewtry
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -11,28 +12,24 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 class MainActivity : AppCompatActivity() {
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val webView: WebView = findViewById(R.id.webView)
+
         val webSettings: WebSettings = webView.settings
         webSettings.javaScriptEnabled = true // JavaScript desteğini etkinleştir
-        webSettings.domStorageEnabled = true // DOM depolama desteğini etkinleştir (gerektiğinde)
-        webSettings.allowFileAccessFromFileURLs = true // Dosya erişimine izin ver
-        webSettings.allowUniversalAccessFromFileURLs = true // Dosya erişimine evrensel erişim izni ver
-        webSettings.allowFileAccess = true // Dosya erişimine izin ver
-        webSettings.allowContentAccess = true // İçerik erişimine izin ver
-        webSettings.mediaPlaybackRequiresUserGesture = false // Medya oynatımı için kullanıcı hareketi gerektirme
-        webView.webChromeClient = WebChromeClient()
-        //webView.settings.javaScriptEnabled = true
+        webSettings.domStorageEnabled = true
 
-        webView.webViewClient = object : WebViewClient() {
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-                super.onReceivedError(view, request, error)
-                Log.e("Deneme Error", error?.description.toString())
-            }
-        }
+        webSettings.setSupportZoom(false)
+        webSettings.builtInZoomControls = false
+        webSettings.cacheMode = WebSettings.LOAD_NO_CACHE
+
+        webView.webChromeClient = WebChromeClient()
+
+
         webView.loadUrl("file:///android_asset/index3.html")
     }
 
